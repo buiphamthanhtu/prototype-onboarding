@@ -381,9 +381,27 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    transition: transform .15s ease;
+    transition: transform .15s ease, background .15s ease, color .15s ease;
+    color: #0A0A0A;
   }
   .chat-mic-btn:active { transform: scale(.92); }
+  /* By default show mic, hide pause */
+  .chat-mic-btn .pause-icon { display: none; }
+  /* While streaming (.chat-processing), swap mic → pause and match the
+     send-pause button from the expanded chat field exactly: 32×32 pill,
+     #0A0A0A bg, 18×18 white icon. */
+  .phone.chat-processing .chat-mic-btn {
+    width: 32px;
+    height: 32px;
+    background: #0A0A0A;
+    color: #fff;
+  }
+  .phone.chat-processing .chat-mic-btn .mic-icon { display: none; }
+  .phone.chat-processing .chat-mic-btn .pause-icon {
+    display: block;
+    width: 18px;
+    height: 18px;
+  }
   /* In chat-mode, the chat-section sits absolutely at the bottom of the device
      and floats above the scrollable conversation. A progressive blur layer
      above the chat-section creates a "frosted edge" effect — content fades
@@ -495,6 +513,23 @@
   }
   /* Hide the bottom toolbar when in chat-mode — inline buttons replace it */
   .phone.chat-mode .chat-actions { display: none; }
+
+  /* When the chat input is focused inside chat-mode, expand back to the full
+     Home-style chat field: full chat-box, bottom toolbar visible, compact
+     side buttons hidden. Blurring the input returns to compact mode. */
+  .phone.chat-mode.chat-expanded .chat-compose-btn,
+  .phone.chat-mode.chat-expanded .chat-mic-btn { display: none; }
+  .phone.chat-mode.chat-expanded .chat-actions { display: flex; }
+  .phone.chat-mode.chat-expanded .chat-box {
+    flex: 1 1 auto;
+    padding: 16px 0 8px;
+    gap: 8px;
+    border-radius: var(--radius-3xl);
+  }
+  .phone.chat-mode.chat-expanded .chat-input-wrap {
+    padding: 0 16px;
+    display: block;
+  }
 
   .chat-actions {
     display: flex;
@@ -3564,6 +3599,14 @@
   .phone.coachmark-step-2 #sendRedBtn {
     pointer-events: auto;
   }
+  /* Also block click on mascot + bubble so the user can't dismiss the home
+     mascot's bubble (or trigger smile) mid-coachmark. */
+  .phone.coachmark-active .mascot,
+  .phone.coachmark-active .bubble-wrap,
+  .phone.coachmark-priming .mascot,
+  .phone.coachmark-priming .bubble-wrap {
+    pointer-events: none;
+  }
 
   /* During coachmark, lay the stage out so mascot drops near the chat field
      with a precise 8px gap, instead of staying centered in the empty area.
@@ -3920,9 +3963,12 @@
 <div class="chat-input-wrap">
 <textarea class="chat-input" id="chatInput" placeholder="Hỏi bất kỳ điều gì..." rows="1"></textarea>
 <button class="chat-mic-btn" id="chatMicBtn" aria-label="Microphone" type="button">
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M16.9449 8.05577C17.4051 8.05577 17.7782 8.42887 17.7782 8.88911C17.7782 12.9033 14.7376 16.2055 10.8338 16.6213V18.0558C10.8338 18.516 10.4607 18.8891 10.0004 18.8891C9.5402 18.8891 9.1671 18.516 9.1671 18.0558V16.6213C5.26329 16.2055 2.22266 12.9033 2.22266 8.88911C2.22266 8.42887 2.59575 8.05577 3.05599 8.05577C3.51623 8.05577 3.88932 8.42887 3.88932 8.88911C3.88932 12.2644 6.62512 15.0002 10.0004 15.0002C13.3758 15.0002 16.1115 12.2644 16.1115 8.88911C16.1115 8.42887 16.4846 8.05577 16.9449 8.05577Z" fill="#0A0A0A"/>
-    <path fill-rule="evenodd" clip-rule="evenodd" d="M10.0004 1.11133C12.455 1.11133 14.4449 3.10117 14.4449 5.55577V8.88911C14.4449 11.3437 12.455 13.3336 10.0004 13.3336C7.54584 13.3336 5.55599 11.3437 5.55599 8.88911V5.55577C5.55599 3.10117 7.54584 1.11133 10.0004 1.11133ZM10.0004 2.77799C8.46631 2.77799 7.22266 4.02165 7.22266 5.55577V8.88911C7.22266 10.4232 8.46631 11.6669 10.0004 11.6669C11.5346 11.6669 12.7782 10.4232 12.7782 8.88911V5.55577C12.7782 4.02165 11.5346 2.77799 10.0004 2.77799Z" fill="#0A0A0A"/>
+  <svg class="mic-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M16.9449 8.05577C17.4051 8.05577 17.7782 8.42887 17.7782 8.88911C17.7782 12.9033 14.7376 16.2055 10.8338 16.6213V18.0558C10.8338 18.516 10.4607 18.8891 10.0004 18.8891C9.5402 18.8891 9.1671 18.516 9.1671 18.0558V16.6213C5.26329 16.2055 2.22266 12.9033 2.22266 8.88911C2.22266 8.42887 2.59575 8.05577 3.05599 8.05577C3.51623 8.05577 3.88932 8.42887 3.88932 8.88911C3.88932 12.2644 6.62512 15.0002 10.0004 15.0002C13.3758 15.0002 16.1115 12.2644 16.1115 8.88911C16.1115 8.42887 16.4846 8.05577 16.9449 8.05577Z" fill="currentColor"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M10.0004 1.11133C12.455 1.11133 14.4449 3.10117 14.4449 5.55577V8.88911C14.4449 11.3437 12.455 13.3336 10.0004 13.3336C7.54584 13.3336 5.55599 11.3437 5.55599 8.88911V5.55577C5.55599 3.10117 7.54584 1.11133 10.0004 1.11133ZM10.0004 2.77799C8.46631 2.77799 7.22266 4.02165 7.22266 5.55577V8.88911C7.22266 10.4232 8.46631 11.6669 10.0004 11.6669C11.5346 11.6669 12.7782 10.4232 12.7782 8.88911V5.55577C12.7782 4.02165 11.5346 2.77799 10.0004 2.77799Z" fill="currentColor"/>
+  </svg>
+  <svg class="pause-icon" width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M14.7222 2.22217H5.27772C3.59019 2.22217 2.22217 3.59019 2.22217 5.27772V14.7222C2.22217 16.4097 3.59019 17.7777 5.27772 17.7777H14.7222C16.4097 17.7777 17.7777 16.4097 17.7777 14.7222V5.27772C17.7777 3.59019 16.4097 2.22217 14.7222 2.22217Z" fill="currentColor"/>
   </svg>
 </button>
 </div>
@@ -5560,18 +5606,16 @@
   const _composeBtn = document.getElementById('chatComposeBtn');
   if (_composeBtn) {
     _composeBtn.addEventListener('click', () => {
-      // Clear all messages (user + AI bubbles, follow-ups, errors)
+      // Tạo chat mới: exit chat-mode → về Home, rồi focus chat input.
+      // exitChatMode() abort stream + clear history + remove .chat-mode class.
+      exitChatMode();
+      // Clear any leftover dynamic messages so the next chat starts clean
       chatConversation.querySelectorAll('.chat-msg-user.follow-up, .chat-msg-ai, .chat-msg-ai-error, .chat-msg-thinking[data-dynamic]').forEach(el => el.remove());
-      // Clear the static first-turn elements
       if (chatMsgText) chatMsgText.textContent = '';
       const staticThinking = document.querySelector('.chat-msg-thinking:not([data-dynamic])');
       if (staticThinking) staticThinking.style.display = 'none';
-      // Abort any in-flight stream
-      if (activeAbortController) { activeAbortController.abort(); activeAbortController = null; }
-      // Reset history but stay in chat-mode (so the compact field stays visible)
-      chatHistory = [];
-      phoneEl.classList.remove('chat-processing');
-      // Refocus input for the user to type a new prompt
+      // Focus the Home chat input shortly after the transition so the user
+      // can start typing the next prompt right away.
       setTimeout(() => chatInput.focus(), 50);
     });
   }
@@ -6238,6 +6282,25 @@ V-App là siêu ứng dụng "một chạm" được phát triển bởi VinSmar
     });
   }
 
+  // Compact mic button (chat-mode field). Doubles as a pause button while
+  // the AI is streaming (visual swap is handled by CSS).
+  const compactMicBtn = document.getElementById('chatMicBtn');
+  if (compactMicBtn) {
+    compactMicBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (phoneEl.classList.contains('chat-processing')) {
+        if (activeAbortController) {
+          activeAbortController.abort();
+        } else {
+          phoneEl.classList.remove('chat-processing');
+        }
+        showToast('Đã dừng');
+      } else {
+        showToast('Đang ghi âm giọng nói...');
+      }
+    });
+  }
+
   // =========== QUICK ITEM → fill chat input ===========
   document.querySelectorAll('.quick-item').forEach(it => {
     it.addEventListener('click', () => {
@@ -6386,6 +6449,11 @@ V-App là siêu ứng dụng "một chạm" được phát triển bởi VinSmar
     phoneEl.classList.add('focused');
     mascot.classList.add('typing');
     updateEyeTracking();
+    // In chat-mode, expand the compact field back to the full Home-style
+    // chat-box (with bottom toolbar). Reverts on blur.
+    if (phoneEl.classList.contains('chat-mode')) {
+      phoneEl.classList.add('chat-expanded');
+    }
   });
   chatInput.addEventListener('input', updateEyeTracking);
   chatInput.addEventListener('keyup', updateEyeTracking);
@@ -6394,6 +6462,7 @@ V-App là siêu ứng dụng "một chạm" được phát triển bởi VinSmar
     phoneEl.classList.remove('focused');
     mascot.classList.remove('typing');
     faceEl.style.transform = '';
+    phoneEl.classList.remove('chat-expanded');
   });
 
   // ========== VisualViewport keyboard fix ==========

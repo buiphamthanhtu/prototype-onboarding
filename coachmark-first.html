@@ -381,9 +381,23 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    transition: transform .15s ease;
+    transition: transform .15s ease, background .15s ease, color .15s ease;
+    color: #0A0A0A;
   }
   .chat-mic-btn:active { transform: scale(.92); }
+  .chat-mic-btn .pause-icon { display: none; }
+  .phone.chat-processing .chat-mic-btn {
+    width: 32px;
+    height: 32px;
+    background: #0A0A0A;
+    color: #fff;
+  }
+  .phone.chat-processing .chat-mic-btn .mic-icon { display: none; }
+  .phone.chat-processing .chat-mic-btn .pause-icon {
+    display: block;
+    width: 18px;
+    height: 18px;
+  }
   /* In chat-mode, the chat-section sits absolutely at the bottom of the device
      and floats above the scrollable conversation. A progressive blur layer
      above the chat-section creates a "frosted edge" effect — content fades
@@ -491,6 +505,23 @@
   }
   /* Hide the bottom toolbar when in chat-mode — inline buttons replace it */
   .phone.chat-mode .chat-actions { display: none; }
+
+  /* When the chat input is focused inside chat-mode, expand back to the full
+     Home-style chat field: full chat-box, bottom toolbar visible, compact
+     side buttons hidden. Blurring the input returns to compact mode. */
+  .phone.chat-mode.chat-expanded .chat-compose-btn,
+  .phone.chat-mode.chat-expanded .chat-mic-btn { display: none; }
+  .phone.chat-mode.chat-expanded .chat-actions { display: flex; }
+  .phone.chat-mode.chat-expanded .chat-box {
+    flex: 1 1 auto;
+    padding: 16px 0 8px;
+    gap: 8px;
+    border-radius: var(--radius-3xl);
+  }
+  .phone.chat-mode.chat-expanded .chat-input-wrap {
+    padding: 0 16px;
+    display: block;
+  }
 
   .chat-actions {
     display: flex;
@@ -1217,15 +1248,27 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin: 0 16px 8px;
+    margin: 0 16px;
     padding: 10px 12px 10px 14px;
     background: #1a1a1a;
     color: #fff;
     border-radius: 12px;
     flex-shrink: 0;
   }
-  .phone.chat-mode .quota-toast {
-    display: none; /* removed for prototype — user is signed up at start */
+  /* In chat-mode, show the quota toast ONLY when the user hasn't completed
+     signup yet (no .has-account class on .phone). Pin it just above the
+     chat-section using the same anchor (.phone). The toast always sits 16px
+     above the top edge of the chat-section, so it shifts up when the input
+     expands. Z-index is set above every other floating layer. */
+  .phone.chat-mode:not(.has-account) .quota-toast {
+    display: flex;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--chat-section-h, 76px) + 16px);
+    z-index: 50;
+    animation: msgAiIn .3s ease-out both;
+    transition: bottom .25s cubic-bezier(.4, 0, .2, 1);
   }
   .quota-toast-text {
     margin: 0;
@@ -2027,6 +2070,110 @@
   }
   .name-submit-btn:active { transform: scale(.98); }
   .name-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* =========== NEW CHAT WARNING MODAL (v5 only) =========== */
+  .newchat-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 370; /* above OTP/name sheets */
+    background: rgba(10, 10, 10, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .newchat-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .newchat-close {
+    position: absolute;
+    top: 24px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-pill);
+    background: var(--neutral-05);
+    border: none;
+    border-top: 2px solid #fff;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform .15s ease;
+    z-index: 1;
+  }
+  .newchat-close:active { transform: scale(.92); }
+  .newchat-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 24px 24px 24px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    text-align: center;
+    transform: scale(0.9);
+    opacity: 0;
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .25s ease;
+  }
+  .newchat-overlay.open .newchat-card {
+    transform: scale(1);
+    opacity: 1;
+  }
+  .newchat-illustration {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 4px;
+  }
+  .newchat-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0A0A0A;
+    margin: 0 0 10px;
+    line-height: 24px;
+  }
+  .newchat-desc {
+    font-size: 14px;
+    line-height: 20px;
+    color: #525252;
+    margin: 0 0 20px;
+  }
+  .newchat-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+  .newchat-btn-secondary,
+  .newchat-btn-primary {
+    flex: 1;
+    padding: 14px 16px;
+    border: none;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform .15s ease;
+  }
+  .newchat-btn-secondary {
+    background: var(--neutral-05);
+    color: #0A0A0A;
+  }
+  .newchat-btn-primary {
+    background: #0A0A0A;
+    color: #fff;
+  }
+  .newchat-btn-secondary:active,
+  .newchat-btn-primary:active {
+    transform: scale(.97);
+  }
 
   .miniapp-overlay.open {
     opacity: 1;
@@ -3560,6 +3707,14 @@
   .phone.coachmark-step-2 #sendRedBtn {
     pointer-events: auto;
   }
+  /* Also block click on mascot + bubble so the user can't dismiss the home
+     mascot's bubble (or trigger smile) mid-coachmark. */
+  .phone.coachmark-active .mascot,
+  .phone.coachmark-active .bubble-wrap,
+  .phone.coachmark-priming .mascot,
+  .phone.coachmark-priming .bubble-wrap {
+    pointer-events: none;
+  }
 
   /* During coachmark, lay the stage out so mascot drops near the chat field
      with a precise 8px gap, instead of staying centered in the empty area.
@@ -3893,9 +4048,9 @@
     <span class="chat-thinking-dots"><i></i><i></i><i></i></span>
   </div>
 </div>
-<!-- Quota toast (shown in chat-mode) -->
+<!-- Quota toast (shown in chat-mode when not signed up) -->
 <div class="quota-toast" id="quotaToast" aria-hidden="true">
-  <p class="quota-toast-text">Còn <span id="quotaCount">3</span>/20 lượt tra cứu. Đăng ký để không giới hạn.</p>
+  <p class="quota-toast-text">Còn <span id="quotaCount">5</span>/5 lượt. Đăng ký để dùng không giới hạn.</p>
   <button class="quota-toast-cta" id="quotaCta">Đăng ký</button>
 </div>
 <!-- Chat Box -->
@@ -3916,9 +4071,12 @@
 <div class="chat-input-wrap">
 <textarea class="chat-input" id="chatInput" placeholder="Hỏi bất kỳ điều gì..." rows="1"></textarea>
 <button class="chat-mic-btn" id="chatMicBtn" aria-label="Microphone" type="button">
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M16.9449 8.05577C17.4051 8.05577 17.7782 8.42887 17.7782 8.88911C17.7782 12.9033 14.7376 16.2055 10.8338 16.6213V18.0558C10.8338 18.516 10.4607 18.8891 10.0004 18.8891C9.5402 18.8891 9.1671 18.516 9.1671 18.0558V16.6213C5.26329 16.2055 2.22266 12.9033 2.22266 8.88911C2.22266 8.42887 2.59575 8.05577 3.05599 8.05577C3.51623 8.05577 3.88932 8.42887 3.88932 8.88911C3.88932 12.2644 6.62512 15.0002 10.0004 15.0002C13.3758 15.0002 16.1115 12.2644 16.1115 8.88911C16.1115 8.42887 16.4846 8.05577 16.9449 8.05577Z" fill="#0A0A0A"/>
-    <path fill-rule="evenodd" clip-rule="evenodd" d="M10.0004 1.11133C12.455 1.11133 14.4449 3.10117 14.4449 5.55577V8.88911C14.4449 11.3437 12.455 13.3336 10.0004 13.3336C7.54584 13.3336 5.55599 11.3437 5.55599 8.88911V5.55577C5.55599 3.10117 7.54584 1.11133 10.0004 1.11133ZM10.0004 2.77799C8.46631 2.77799 7.22266 4.02165 7.22266 5.55577V8.88911C7.22266 10.4232 8.46631 11.6669 10.0004 11.6669C11.5346 11.6669 12.7782 10.4232 12.7782 8.88911V5.55577C12.7782 4.02165 11.5346 2.77799 10.0004 2.77799Z" fill="#0A0A0A"/>
+  <svg class="mic-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M16.9449 8.05577C17.4051 8.05577 17.7782 8.42887 17.7782 8.88911C17.7782 12.9033 14.7376 16.2055 10.8338 16.6213V18.0558C10.8338 18.516 10.4607 18.8891 10.0004 18.8891C9.5402 18.8891 9.1671 18.516 9.1671 18.0558V16.6213C5.26329 16.2055 2.22266 12.9033 2.22266 8.88911C2.22266 8.42887 2.59575 8.05577 3.05599 8.05577C3.51623 8.05577 3.88932 8.42887 3.88932 8.88911C3.88932 12.2644 6.62512 15.0002 10.0004 15.0002C13.3758 15.0002 16.1115 12.2644 16.1115 8.88911C16.1115 8.42887 16.4846 8.05577 16.9449 8.05577Z" fill="currentColor"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M10.0004 1.11133C12.455 1.11133 14.4449 3.10117 14.4449 5.55577V8.88911C14.4449 11.3437 12.455 13.3336 10.0004 13.3336C7.54584 13.3336 5.55599 11.3437 5.55599 8.88911V5.55577C5.55599 3.10117 7.54584 1.11133 10.0004 1.11133ZM10.0004 2.77799C8.46631 2.77799 7.22266 4.02165 7.22266 5.55577V8.88911C7.22266 10.4232 8.46631 11.6669 10.0004 11.6669C11.5346 11.6669 12.7782 10.4232 12.7782 8.88911V5.55577C12.7782 4.02165 11.5346 2.77799 10.0004 2.77799Z" fill="currentColor"/>
+  </svg>
+  <svg class="pause-icon" width="14" height="14" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M14.7222 2.22217H5.27772C3.59019 2.22217 2.22217 3.59019 2.22217 5.27772V14.7222C2.22217 16.4097 3.59019 17.7777 5.27772 17.7777H14.7222C16.4097 17.7777 17.7777 16.4097 17.7777 14.7222V5.27772C17.7777 3.59019 16.4097 2.22217 14.7222 2.22217Z" fill="currentColor"/>
   </svg>
 </button>
 </div>
@@ -5306,6 +5464,46 @@
   </div>
 </div>
 
+<!-- =========== NEW CHAT WARNING MODAL (v5: gates "new chat" for guests) =========== -->
+<div class="newchat-overlay" id="newchatOverlay" aria-hidden="true">
+  <button class="newchat-close" id="newchatCloseBtn" aria-label="Đóng" type="button">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.9597 4.62637C18.3503 4.23588 18.9833 4.23586 19.3738 4.62637C19.7642 5.0169 19.7642 5.64995 19.3738 6.04044L13.4142 12.0001L19.3738 17.9597C19.7642 18.3502 19.7642 18.9833 19.3738 19.3738C18.9833 19.7643 18.3503 19.7642 17.9597 19.3738L12.0001 13.4141L6.04045 19.3738C5.64997 19.7643 5.01692 19.7642 4.62639 19.3738C4.23587 18.9832 4.23587 18.3502 4.62639 17.9597L10.586 12.0001L4.62639 6.04044C4.23587 5.64991 4.23587 5.0169 4.62639 4.62637C5.01692 4.23588 5.64994 4.23586 6.04045 4.62637L12.0001 10.586L17.9597 4.62637Z" fill="#0A0A0A"/>
+    </svg>
+  </button>
+  <div class="newchat-card">
+    <div class="newchat-illustration" aria-hidden="true">
+      <!-- Traffic light illustration -->
+      <svg width="120" height="160" viewBox="0 0 120 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Top arm -->
+        <rect x="55" y="6" width="10" height="14" rx="1.5" fill="#9CA3AF"/>
+        <!-- Body -->
+        <rect x="22" y="18" width="76" height="116" rx="14" fill="#4B5563"/>
+        <rect x="24" y="20" width="72" height="112" rx="12" fill="#6B7280"/>
+        <!-- Hood ledges -->
+        <rect x="20" y="44" width="80" height="4" rx="2" fill="#374151"/>
+        <rect x="20" y="84" width="80" height="4" rx="2" fill="#374151"/>
+        <rect x="20" y="124" width="80" height="4" rx="2" fill="#374151"/>
+        <!-- Lights -->
+        <circle cx="60" cy="36" r="14" fill="#1F2937"/>
+        <circle cx="60" cy="76" r="14" fill="#F59E0B"/>
+        <circle cx="60" cy="76" r="11" fill="#FBBF24"/>
+        <circle cx="56" cy="73" r="3.5" fill="#FCD34D" opacity="0.7"/>
+        <circle cx="60" cy="116" r="14" fill="#1F2937"/>
+        <!-- Base -->
+        <rect x="48" y="134" width="24" height="4" rx="1.5" fill="#9CA3AF"/>
+        <rect x="36" y="138" width="48" height="6" rx="2" fill="#6B7280"/>
+      </svg>
+    </div>
+    <h3 class="newchat-title">Đừng để mất tin nhắn</h3>
+    <p class="newchat-desc">Bạn nên đăng ký để lưu lại nội dung này. Nếu tạo mới ngay, nội dung hiện tại sẽ biến mất.</p>
+    <div class="newchat-actions">
+      <button class="newchat-btn-secondary" id="newchatProceedBtn" type="button">Tạo chat mới</button>
+      <button class="newchat-btn-primary" id="newchatSignupBtn" type="button">Đăng ký</button>
+    </div>
+  </div>
+</div>
+
 <!-- =========== MINI APP BOTTOM SHEET =========== -->
 <div class="miniapp-overlay" id="miniappOverlay" aria-hidden="true">
   <div class="miniapp-sheet">
@@ -5379,13 +5577,6 @@
   function switchTab(target) {
     const tabEl = document.querySelector(`.seg-item[data-tab="${target}"]`);
     if (!tabEl || tabEl.classList.contains('active')) return;
-    // V5 flow: navigating away from the lookup tab triggers the signup gate
-    // when the user hasn't completed signup yet.
-    if (target !== 'lookup' && window._shouldGate && window._shouldGate()) {
-      window._introSignupGate = true;
-      window._openSignup && window._openSignup();
-      return;
-    }
     tabs.forEach(x => x.classList.remove('active'));
     tabs.forEach(x => x.setAttribute('aria-selected','false'));
     tabEl.classList.add('active');
@@ -5565,28 +5756,65 @@
 
   // Compose (new chat) button inside the compact chat field — clears the
   // current conversation and stays in chat-mode for a fresh thread.
+  // Helper: actually clear chat conversation + exit to Home + focus input.
+  // Used by both the v4-style direct flow AND the v5 modal "Tạo chat mới" CTA.
+  function performNewChat() {
+    exitChatMode();
+    chatConversation.querySelectorAll('.chat-msg-user.follow-up, .chat-msg-ai, .chat-msg-ai-error, .chat-msg-thinking[data-dynamic]').forEach(el => el.remove());
+    if (chatMsgText) chatMsgText.textContent = '';
+    const staticThinking = document.querySelector('.chat-msg-thinking:not([data-dynamic])');
+    if (staticThinking) staticThinking.style.display = 'none';
+    setTimeout(() => chatInput.focus(), 50);
+  }
+
+  const newchatOverlay = document.getElementById('newchatOverlay');
+  function openNewchatModal() {
+    if (!newchatOverlay) return;
+    newchatOverlay.classList.add('open');
+    newchatOverlay.setAttribute('aria-hidden', 'false');
+  }
+  function closeNewchatModal() {
+    if (!newchatOverlay) return;
+    newchatOverlay.classList.remove('open');
+    newchatOverlay.setAttribute('aria-hidden', 'true');
+  }
+
   const _composeBtn = document.getElementById('chatComposeBtn');
   if (_composeBtn) {
     _composeBtn.addEventListener('click', () => {
-      // V5 flow: composing a new chat without an account → signup
+      // V5: guests see the "don't lose your messages" warning modal before
+      // a new chat is started. Signed-in users would go straight through.
       if (window._shouldGate && window._shouldGate()) {
-        window._introSignupGate = true;
-        window._openSignup && window._openSignup();
+        openNewchatModal();
         return;
       }
-      // Clear all messages (user + AI bubbles, follow-ups, errors)
-      chatConversation.querySelectorAll('.chat-msg-user.follow-up, .chat-msg-ai, .chat-msg-ai-error, .chat-msg-thinking[data-dynamic]').forEach(el => el.remove());
-      // Clear the static first-turn elements
-      if (chatMsgText) chatMsgText.textContent = '';
-      const staticThinking = document.querySelector('.chat-msg-thinking:not([data-dynamic])');
-      if (staticThinking) staticThinking.style.display = 'none';
-      // Abort any in-flight stream
-      if (activeAbortController) { activeAbortController.abort(); activeAbortController = null; }
-      // Reset history but stay in chat-mode (so the compact field stays visible)
-      chatHistory = [];
-      phoneEl.classList.remove('chat-processing');
-      // Refocus input for the user to type a new prompt
-      setTimeout(() => chatInput.focus(), 50);
+      performNewChat();
+    });
+  }
+  // Modal actions
+  const newchatCloseBtn = document.getElementById('newchatCloseBtn');
+  if (newchatCloseBtn) {
+    newchatCloseBtn.addEventListener('click', closeNewchatModal);
+  }
+  const newchatProceedBtn = document.getElementById('newchatProceedBtn');
+  if (newchatProceedBtn) {
+    newchatProceedBtn.addEventListener('click', () => {
+      closeNewchatModal();
+      performNewChat();
+    });
+  }
+  const newchatSignupBtn = document.getElementById('newchatSignupBtn');
+  if (newchatSignupBtn) {
+    newchatSignupBtn.addEventListener('click', () => {
+      closeNewchatModal();
+      window._introSignupGate = true;
+      if (window._openSignup) window._openSignup();
+    });
+  }
+  // Click backdrop (outside the card) to close
+  if (newchatOverlay) {
+    newchatOverlay.addEventListener('click', (e) => {
+      if (e.target === newchatOverlay) closeNewchatModal();
     });
   }
 
@@ -5660,7 +5888,7 @@
   const chatConversation = document.getElementById('chatConversation');
   const chatMsgText = document.getElementById('chatMsgText');
   const quotaCount = document.getElementById('quotaCount');
-  const QUOTA_LIMIT = 20;
+  const QUOTA_LIMIT = 5;
   let quotaUsed = 0;
 
   // =========== ANTHROPIC API INTEGRATION ===========
@@ -6149,9 +6377,9 @@ V-App là siêu ứng dụng "một chạm" được phát triển bởi VinSmar
   function enterChatMode(userMessage) {
     const isFirstTurn = !phoneEl.classList.contains('chat-mode');
 
-    // V5 flow: the first send (during the coachmark) is allowed through.
-    // Any subsequent send from a non-signed-in user triggers the signup gate.
-    if (!isFirstTurn && window._shouldGate && window._shouldGate()) {
+    // V5 flow: allow up to QUOTA_LIMIT messages from a guest user. Beyond that,
+    // any further send opens the signup gate.
+    if (!isFirstTurn && quotaUsed >= QUOTA_LIMIT && window._shouldGate && window._shouldGate()) {
       window._introSignupGate = true;
       window._openSignup && window._openSignup();
       return;
@@ -6184,7 +6412,7 @@ V-App là siêu ứng dụng "một chạm" được phát triển bởi VinSmar
     // Quota
     if (quotaUsed < QUOTA_LIMIT) quotaUsed++;
     const remaining = Math.max(0, QUOTA_LIMIT - quotaUsed);
-    quotaCount.textContent = remaining;
+    if (quotaCount) quotaCount.textContent = remaining;
 
     chatInput.blur();
     scrollChatToBottom();
@@ -6252,6 +6480,25 @@ V-App là siêu ứng dụng "một chạm" được phát triển bởi VinSmar
         phoneEl.classList.remove('chat-processing');
       }
       showToast('Đã dừng');
+    });
+  }
+
+  // Compact mic button (chat-mode field). Doubles as a pause button while
+  // the AI is streaming (visual swap is handled by CSS).
+  const compactMicBtn = document.getElementById('chatMicBtn');
+  if (compactMicBtn) {
+    compactMicBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (phoneEl.classList.contains('chat-processing')) {
+        if (activeAbortController) {
+          activeAbortController.abort();
+        } else {
+          phoneEl.classList.remove('chat-processing');
+        }
+        showToast('Đã dừng');
+      } else {
+        showToast('Đang ghi âm giọng nói...');
+      }
     });
   }
 
@@ -6325,6 +6572,26 @@ V-App là siêu ứng dụng "một chạm" được phát triển bởi VinSmar
   // =========== CHAT FOCUS / KEYBOARD =========== */
   const phoneEl = document.querySelector('.phone');
   const faceEl = mascot.querySelector('.face');
+
+  // Track chat-section height as a CSS variable so the quota toast can stick
+  // 16px above its top edge — toast follows automatically when the input
+  // expands on focus, or shrinks back on blur.
+  (function trackChatSectionHeight() {
+    const chatSectionEl = document.querySelector('.chat-section');
+    if (!chatSectionEl) return;
+    const apply = () => {
+      const h = chatSectionEl.offsetHeight;
+      phoneEl.style.setProperty('--chat-section-h', h + 'px');
+    };
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(apply);
+      ro.observe(chatSectionEl);
+    } else {
+      // Fallback: poll on focus/blur (covered by listeners below)
+      window.addEventListener('resize', apply);
+    }
+    apply();
+  })();
 
   // Mirror div technique: clone textarea styles into an off-screen div,
   // then measure the caret position via a Range on the text node.
@@ -6403,6 +6670,9 @@ V-App là siêu ứng dụng "một chạm" được phát triển bởi VinSmar
     phoneEl.classList.add('focused');
     mascot.classList.add('typing');
     updateEyeTracking();
+    if (phoneEl.classList.contains('chat-mode')) {
+      phoneEl.classList.add('chat-expanded');
+    }
   });
   chatInput.addEventListener('input', updateEyeTracking);
   chatInput.addEventListener('keyup', updateEyeTracking);
@@ -6411,6 +6681,7 @@ V-App là siêu ứng dụng "một chạm" được phát triển bởi VinSmar
     phoneEl.classList.remove('focused');
     mascot.classList.remove('typing');
     faceEl.style.transform = '';
+    phoneEl.classList.remove('chat-expanded');
   });
 
   // ========== VisualViewport keyboard fix ==========
@@ -6568,10 +6839,11 @@ V-App là siêu ứng dụng "một chạm" được phát triển bởi VinSmar
   function openSignup() {
     const el = document.getElementById('signupScreen');
     if (!el) return;
-    // Hide close button when signup is gating intro flow (must complete to proceed)
+    // v5: signup is never forced — close button is always visible so the user
+    // can dismiss the screen and return to whatever they were doing.
     const closeBtn = document.getElementById('signupCloseBtn');
     if (closeBtn) {
-      closeBtn.style.display = window._introSignupGate ? 'none' : '';
+      closeBtn.style.display = '';
     }
     el.classList.add('open');
     el.setAttribute('aria-hidden', 'false');
@@ -6783,7 +7055,10 @@ V-App là siêu ứng dụng "một chạm" được phát triển bởi VinSmar
   // Trigger: "Đăng ký" in quota toast → open signup
   const quotaCtaBtn = document.getElementById('quotaCta');
   if (quotaCtaBtn) {
-    quotaCtaBtn.addEventListener('click', openSignup);
+    quotaCtaBtn.addEventListener('click', () => {
+      window._introSignupGate = true;
+      openSignup();
+    });
   }
   // ----- Signup form validation -----
   const phoneField = document.getElementById('signupPhoneField');
@@ -6875,14 +7150,12 @@ V-App là siêu ứng dụng "một chạm" được phát triển bởi VinSmar
     const isRegister = action === 'Đăng ký';
     if (!validateSignup(isRegister)) return;
 
-    if (window._introSignupGate) {
-      // Đến từ flow intro → mở OTP sheet để verify, sau khi verify mới đóng signup
-      const phoneVal = (phoneField.value || '').replace(/\D/g, '');
-      openOtpSheet(phoneVal);
-    } else {
-      // Mở từ chỗ khác (menu, bell, quota toast) → giữ behavior cũ
-      showToast(action);
-    }
+    // V5: always run the full signup flow (form → OTP → Name) regardless of
+    // entry point, so the user experiences the complete signup journey.
+    // The intro-gate flag controls the OTP→Name handoff inside onOtpComplete.
+    window._introSignupGate = true;
+    const phoneVal = (phoneField.value || '').replace(/\D/g, '');
+    openOtpSheet(phoneVal);
   }
   const signupPrimary = document.getElementById('signupPrimary');
   if (signupPrimary) {
@@ -7011,48 +7284,37 @@ V-App là siêu ứng dụng "một chạm" được phát triển bởi VinSmar
   }
 
   function updateAccountHeader() {
-    try {
-      const name = localStorage.getItem('vai_user_name') || '';
-      const phone = localStorage.getItem('vai_user_phone') || '';
-      const nameEl = document.getElementById('accUserName');
-      const phoneEl2 = document.getElementById('accUserPhone');
-      if (nameEl) nameEl.textContent = name || '—';
-      if (phoneEl2) phoneEl2.textContent = phone || '—';
-      if (name) phoneEl.classList.add('has-account');
-    } catch (e) {}
+    // v5: read from in-session state, not localStorage. Each page load starts
+    // as a fresh guest — even if a previous tester signed up on this browser,
+    // we want the next tester to experience the full guest flow.
+    const nameEl = document.getElementById('accUserName');
+    const phoneEl2 = document.getElementById('accUserPhone');
+    if (nameEl) nameEl.textContent = window._sessionUserName || '—';
+    if (phoneEl2) phoneEl2.textContent = window._sessionUserPhone || '—';
   }
-  // Run on load so a previously-signed-in user sees the right header
-  updateAccountHeader();
-  // Expose for the signup gate flow
   window._updateAccountHeader = updateAccountHeader;
 
-  // V5 flow: interactions check this before running. Returns true when the
-  // user has NOT completed signup yet — the caller should open signup gate.
+  // V5 flow: gate interactions only while user hasn't completed signup
+  // (within the current page session — never persisted).
   window._shouldGate = function() {
     return !phoneEl.classList.contains('has-account');
   };
 
   function finalizeSignup() {
-    // Persist the entered name + phone so the account drawer can show them.
-    try {
-      const name = (nameInput.value || '').trim();
-      const phoneRaw = (phoneField.value || '').replace(/\D/g, '');
-      const phoneDisplay = formatPhoneDisplay(phoneRaw);
-      localStorage.setItem('vai_user_name', name);
-      localStorage.setItem('vai_user_phone', phoneDisplay);
-    } catch (e) {}
-    // Mark phone DOM as signed-in so the account drawer renders the new state
+    // Save the entered name + phone in MEMORY only (not localStorage) so the
+    // account drawer can show them this session. Reloading the page returns
+    // to a fresh guest state.
+    const name = (nameInput.value || '').trim();
+    const phoneRaw = (phoneField.value || '').replace(/\D/g, '');
+    window._sessionUserName = name;
+    window._sessionUserPhone = formatPhoneDisplay(phoneRaw);
     phoneEl.classList.add('has-account');
     updateAccountHeader();
-    // Close everything and continue to Home + coachmark
     window._introSignupGate = false;
     clearPhoneError();
     clearAgreeErrors();
     closeNameSheet();
     setTimeout(() => closeSignup(), 100);
-    setTimeout(() => {
-      if (window.startCoachmark) window.startCoachmark();
-    }, 700);
   }
 
   if (nameInput) {

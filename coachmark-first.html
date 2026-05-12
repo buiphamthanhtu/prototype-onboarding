@@ -5740,6 +5740,9 @@
       // Don't swipe when intro or coachmark overlays are visible
       if (introOverlay && !introOverlay.classList.contains('hidden')) return false;
       if (cmOverlay && cmOverlay.classList.contains('active')) return false;
+      // Don't swipe when in chat mode — the conversation is the focus, and
+      // accidental swipes would yank the user off to another tab mid-reply.
+      if (phone.classList.contains('chat-mode')) return false;
       // Don't swipe when the gesture started on an interactive/scrollable element
       if (!startEl) return true;
       const blocker = startEl.closest(

@@ -3806,7 +3806,7 @@
        `clip-path: circle(var(--b))` rules does NOT transition smoothly.) */
     clip-path: circle(var(--shrink-r, 1000px) at var(--shrink-x, 50%) var(--shrink-y, 50%));
     -webkit-clip-path: circle(var(--shrink-r, 1000px) at var(--shrink-x, 50%) var(--shrink-y, 50%));
-    transition: --shrink-r 1.3s cubic-bezier(.4, 0, .25, 1);
+    transition: --shrink-r 1.4s cubic-bezier(.45, .25, .55, .95);
     will-change: clip-path;
   }
   .intro-overlay.shrunk {
@@ -3819,7 +3819,7 @@
     /* left/top set by JS to sit below the mascot. Fallback to screen-center. */
     left: 50%;
     top: 50%;
-    transform: translate(-50%, 0) translateY(120px);
+    transform: translate(-50%, 0) translateY(20px);
     color: #FFFFFF;
     font-size: 22px;
     line-height: 28px;
@@ -3833,7 +3833,7 @@
   }
   .splash-tagline.visible {
     opacity: 1;
-    transform: translate(-50%, 0) translateY(130px);
+    transform: translate(-50%, 0) translateY(30px);
   }
   .splash-logo {
     position: absolute;
@@ -6972,11 +6972,13 @@ Phong cách: Thân thiện, ngắn gọn (2-4 câu cho câu trả lời thông t
     commands.className = 'chat-msg-ai-commands';
     const arrowSvg = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
     const lowerPrompt = (userText || '').toLowerCase();
-    let suggestedCmds = ['Ăn gì gần đây?', '5 triệu đi đâu được?'];
-    if (lowerPrompt.indexOf('ăn gì gần đây') !== -1) {
-      suggestedCmds = ['5 triệu đi đâu được?', 'Tìm quán ăn trưa văn phòng'];
-    } else if (lowerPrompt.indexOf('5 triệu') !== -1) {
-      suggestedCmds = ['Ăn gì gần đây?', 'Kinh nghiệm du lịch Cát Bà tiết kiệm'];
+    let suggestedCmds = ['Giảm cân', 'Giảm căng thẳng'];
+    if (lowerPrompt.indexOf('chạy bộ hay đi bộ') !== -1) {
+      suggestedCmds = ['Giảm cân', 'Giảm căng thẳng'];
+    } else if (lowerPrompt.indexOf('giảm cân') !== -1) {
+      suggestedCmds = ['Giảm căng thẳng', 'Chạy bộ hay đi bộ tốt hơn?'];
+    } else if (lowerPrompt.indexOf('giảm căng thẳng') !== -1) {
+      suggestedCmds = ['Giảm cân', 'Chạy bộ hay đi bộ tốt hơn?'];
     }
     suggestedCmds.forEach(label => {
       const row = document.createElement('div');
@@ -7109,6 +7111,42 @@ Di chuyển với Xanh SM, mua sắm tại Vincom, nghỉ dưỡng Vinpearl,... 
   };
 
   const MOCK_RESPONSES = [
+    {
+      match: 'chạy bộ hay đi bộ',
+      text: `Không có bộ môn nào tốt hơn hoàn toàn, vì **V-AI** hiểu mỗi cơ thể là một bản thể duy nhất.
+
+🏃‍♂️ Nếu bạn muốn đốt calo nhanh, chạy bộ là lựa chọn phù hợp.
+
+🚶‍♀️ Nếu bạn muốn ít chấn thương hơn, hãy chọn đi bộ.
+
+👉 Mục tiêu của bạn là gì để **V-AI** có thể gợi ý lịch tập cụ thể cho bạn?`,
+    },
+    {
+      match: 'giảm cân',
+      text: `**Lộ trình Chạy bộ Giảm cân (Đốt mỡ tối ưu)**
+
+Mục tiêu: Kích hoạt chế độ đốt mỡ tự nhiên bằng phương pháp chạy ngắt quãng (Interval), giúp cơ thể tiếp tục đốt calo ngay cả sau khi tập.
+
+- **Thứ 2 (Khởi động):** Đi bộ 5 phút + Chạy chậm 15 phút + Đi bộ thả lỏng 5 phút.
+- **Thứ 3:** Nghỉ ngơi hoặc giãn cơ nhẹ nhàng tại nhà.
+- **Thứ 4 (Đốt mỡ đỉnh cao):** Đi bộ 5 phút + [Chạy nhanh 1 phút + Đi bộ 2 phút] x 6 vòng + Đi bộ thả lỏng 5 phút.
+- **Thứ 5:** Nghỉ ngơi chủ động (đi dạo nhẹ nhàng hoặc làm việc nhà).
+- **Thứ 6 (Bứt phá sức bền):** Chạy liên tục tốc độ vừa phải trong 20 - 25 phút.
+- **Cuối tuần:** Tự do vận động (đạp xe, bơi lội) hoặc nghỉ ngơi để cơ bắp phục hồi.`,
+    },
+    {
+      match: 'giảm căng thẳng',
+      text: `**Lộ trình Đi bộ Giảm căng thẳng (Chữa lành tâm trí)**
+
+Mục tiêu: Hạ thấp mức cortisol (hormone stress), giải tỏa áp lực.
+
+- **Thứ 2 (Xả stress đầu tuần):** 20 phút đi bộ chậm lúc cuối ngày, tập trung vào hơi thở sâu (hít vào 4 nhịp, thở ra 4 nhịp).
+- **Thứ 3:** 20 phút đi bộ thả lỏng kết hợp nghe một podcast self-care hoặc bản nhạc nhẹ bạn yêu thích.
+- **Thứ 4 (Reset giữa tuần):** 15 phút đi bộ nhanh vào buổi sáng để kích hoạt năng lượng tích cực cho ngày mới.
+- **Thứ 5:** Nghỉ ngơi, dành thời gian ngâm chân hoặc thư giãn tại nhà.
+- **Thứ 6 (Mindful Walking):** 25 phút đi bộ chậm, không điện thoại, tập trung cảm nhận bước chân và không gian xung quanh để gọi tên 5 điều tích cực trong tuần.
+- **Cuối tuần:** Một chuyến đi bộ dài hơn (30 - 45 phút) ở công viên hoặc nơi có nhiều cây xanh cùng người thân bè bạn.`,
+    },
     {
       match: 'ăn gì gần đây',
       text: `{{CAROUSEL:foodNearby}}
@@ -8639,9 +8677,9 @@ Với 5 triệu đồng, bạn hoàn toàn có thể thực hiện các chuyến
       vsf.style.top = cy + 'px';
     }
     if (splashTagline) {
-      // Tagline sits right below the mascot — mascot radius (75) + gap.
+      // Tagline sits closer to the mascot — just below the body, small gap.
       splashTagline.style.left = cx + 'px';
-      splashTagline.style.top = (cy + (mr.height / 2)) + 'px';
+      splashTagline.style.top = (cy + (mr.height / 2) - 5) + 'px';
     }
   }
 
@@ -8761,7 +8799,7 @@ Với 5 triệu đồng, bạn hoàn toàn có thể thực hiện các chuyến
         setTimeout(() => {
           if (window.startCoachmark) window.startCoachmark();
         }, 250);
-      }, 1550);
+      }, 1650);
     } else {
       overlay.classList.add('hidden');
       setTimeout(() => {
@@ -8854,7 +8892,7 @@ Với 5 triệu đồng, bạn hoàn toàn có thể thực hiện các chuyến
 
       // PHASE 3: blur fully settled (~350ms transition + read time) → start typing
       setTimeout(() => {
-        typeIntoChatInput('V-app có gì?', () => {
+        typeIntoChatInput('Chạy bộ hay đi bộ tốt hơn?', () => {
           // PHASE 4: typing done → wait 1s before mascot moves
           setTimeout(() => {
             // PHASE 5: hide current bubble, slide mascot to the right
